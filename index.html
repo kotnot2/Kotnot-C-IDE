@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kotnot-C IDE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            background: #2d2d2d;
+            padding: 15px 20px;
+            border-bottom: 2px solid #007acc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        header h1 {
+            color: #007acc;
+            font-weight: 300;
+        }
+        
+        header h1 span {
+            color: #d4d4d4;
+        }
+        
+        .menu {
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            background: #007acc;
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        button:hover {
+            background: #005a9e;
+            transform: scale(1.02);
+        }
+        
+        button.danger {
+            background: #c42b1c;
+        }
+        
+        button.danger:hover {
+            background: #9e1f12;
+        }
+        
+        button.success {
+            background: #2ea043;
+        }
+        
+        button.success:hover {
+            background: #1f7a33;
+        }
+        
+        .container {
+            display: flex;
+            flex: 1;
+            gap: 0;
+            height: calc(100vh - 70px);
+        }
+        
+        .editor-container {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #3d3d3d;
+        }
+        
+        .editor-container textarea {
+            flex: 1;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border: none;
+            padding: 20px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            resize: none;
+            outline: none;
+            line-height: 1.6;
+            tab-size: 4;
+        }
+        
+        .editor-container textarea::selection {
+            background: #264f78;
+        }
+        
+        .output-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #1e1e1e;
+        }
+        
+        .output-container .tabs {
+            display: flex;
+            background: #2d2d2d;
+            border-bottom: 1px solid #3d3d3d;
+        }
+        
+        .output-container .tabs button {
+            background: transparent;
+            border: none;
+            color: #858585;
+            padding: 10px 20px;
+            border-radius: 0;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .output-container .tabs button.active {
+            color: #d4d4d4;
+            border-bottom-color: #007acc;
+        }
+        
+        .output-content {
+            flex: 1;
+            overflow: auto;
+            padding: 20px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+        
+        .output-content.success {
+            color: #4ec9b0;
+        }
+        
+        .output-content.error {
+            color: #f44747;
+        }
+        
+        .status-bar {
+            background: #007acc;
+            color: white;
+            padding: 5px 20px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #3d3d3d;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4d4d4d;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>⚡ Kotnot-<span>C</span></h1>
+        <div class="menu">
+            <button onclick="runCode()" class="success">▶ Запустить</button>
+            <button onclick="compileCode()">🔧 Компилировать</button>
+            <button onclick="clearOutput()" class="danger">✖ Очистить</button>
+            <button onclick="loadExample()">📄 Пример</button>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="editor-container">
+            <textarea id="codeEditor" spellcheck="false">&#x3C;kotnot&#x3E;
+    &#x3C;program&#x3E;
+        &#x3C;var name = &#x22;Мир&#x22;/&#x3E;
+        &#x3C;var age = 25/&#x3E;
+        &#x3C;var pi = 3.14159/&#x3E;
+        
+        &#x3C;print &#x22;Привет, &#x22; + name + &#x22;!&#x22;/&#x3E;
+        &#x3C;print &#x22;Тебе &#x22; + age + &#x22; лет&#x22;/&#x3E;
+        
+        &#x3C;if age >= 18&#x3E;
+            &#x3C;print &#x22;Ты совершеннолетний&#x22;/&#x3E;
+        &#x3C;/if&#x3E;
+        
+        &#x3C;loop i = 0 to 3&#x3E;
+            &#x3C;print &#x22;Итерация: &#x22; + i/&#x3E;
+        &#x3C;/loop&#x3E;
+        
+        &#x3C;print &#x22;Число Пи = &#x22; + pi/&#x3E;
+    &#x3C;/program&#x3E;
+&#x3C;/kotnot&#x3E;</textarea>
+        </div>
+        
+        <div class="output-container">
+            <div class="tabs">
+                <button class="active" onclick="switchTab('output')">Вывод</button>
+                <button onclick="switchTab('compiled')">Скомпилированный код</button>
+            </div>
+            <div id="outputDisplay" class="output-content"></div>
+        </div>
+    </div>
+    
+    <div class="status-bar">
+        <span id="statusText">Готов к работе</span>
+        <span id="lineCount">Строк: 0</span>
+    </div>
+    
+    <script src="interpretator.js"></script>
+    <script src="compiler.js"></script>
+    <script>
+        // Обновление счетчика строк
+        document.getElementById('codeEditor').addEventListener('input', function() {
+            const lines = this.value.split('\n').length;
+            document.getElementById('lineCount').textContent = `Строк: ${lines}`;
+        });
+        
+        // Переключение вкладок
+        function switchTab(tab) {
+            const buttons = document.querySelectorAll('.tabs button');
+            buttons.forEach(b => b.classList.remove('active'));
+            
+            if (tab === 'output') {
+                buttons[0].classList.add('active');
+                document.getElementById('outputDisplay').textContent = 
+                    document.getElementById('outputDisplay').dataset.output || 'Нет вывода';
+            } else {
+                buttons[1].classList.add('active');
+                document.getElementById('outputDisplay').textContent = 
+                    document.getElementById('outputDisplay').dataset.compiled || 'Нет скомпилированного кода';
+            }
+        }
+        
+        // Основные функции
+        function runCode() {
+            const code = document.getElementById('codeEditor').value;
+            const output = document.getElementById('outputDisplay');
+            
+            try {
+                const result = interpret(code);
+                output.className = 'output-content success';
+                output.textContent = result || 'Программа выполнена успешно (нет вывода)';
+                output.dataset.output = output.textContent;
+                document.getElementById('statusText').textContent = '✅ Выполнено успешно';
+            } catch (e) {
+                output.className = 'output-content error';
+                output.textContent = `❌ Ошибка: ${e.message}`;
+                output.dataset.output = output.textContent;
+                document.getElementById('statusText').textContent = '❌ Ошибка выполнения';
+            }
+            
+            switchTab('output');
+        }
+        
+        function compileCode() {
+            const code = document.getElementById('codeEditor').value;
+            const output = document.getElementById('outputDisplay');
+            
+            try {
+                const compiled = compile(code);
+                output.className = 'output-content success';
+                output.textContent = compiled;
+                output.dataset.compiled = compiled;
+                document.getElementById('statusText').textContent = '✅ Компиляция успешна';
+            } catch (e) {
+                output.className = 'output-content error';
+                output.textContent = `❌ Ошибка компиляции: ${e.message}`;
+                output.dataset.compiled = output.textContent;
+                document.getElementById('statusText').textContent = '❌ Ошибка компиляции';
+            }
+            
+            switchTab('compiled');
+        }
+        
+        function clearOutput() {
+            const output = document.getElementById('outputDisplay');
+            output.className = 'output-content';
+            output.textContent = 'Очищено';
+            output.dataset.output = '';
+            output.dataset.compiled = '';
+            document.getElementById('statusText').textContent = '🧹 Вывод очищен';
+        }
+        
+        function loadExample() {
+            const examples = [
+                `&#x3C;kotnot&#x3E;
+    &#x3C;program&#x3E;
+        &#x3C;var name = &#x22;Kotnot-C&#x22;/&#x3E;
+        &#x3C;var year = 2026/&#x3E;
+        &#x3C;var version = 1.0/&#x3E;
+        
+        &#x3C;print &#x22;Добро пожаловать в &#x22; + name + &#x22;!&#x22;/&#x3E;
+        &#x3C;print &#x22;Версия: &#x22; + version/&#x3E;
+        &#x3C;print &#x22;Год создания: &#x22; + year/&#x3E;
+        
+        &#x3C;if year > 2020&#x3E;
+            &#x3C;print &#x22;Это современный язык!&#x22;/&#x3E;
+        &#x3C;/if&#x3E;
+        
+        &#x3C;loop i = 1 to 5&#x3E;
+            &#x3C;print &#x22;Счет: &#x22; + i/&#x3E;
+        &#x3C;/loop&#x3E;
+        
+        &#x3C;var sum = 0/&#x3E;
+        &#x3C;loop i = 1 to 10&#x3E;
+            &#x3C;var sum = sum + i/&#x3E;
+        &#x3C;/loop&#x3E;
+        &#x3C;print &#x22;Сумма чисел от 1 до 10 = &#x22; + sum/&#x3E;
+    &#x3C;/program&#x3E;
+&#x3C;/kotnot&#x3E;`,
+                `&#x3C;kotnot&#x3E;
+    &#x3C;program&#x3E;
+        &#x3C;var x = 10/&#x3E;
+        &#x3C;var y = 20/&#x3E;
+        &#x3C;var z = x * y + 5/&#x3E;
+        &#x3C;print &#x22;x = &#x22; + x/&#x3E;
+        &#x3C;print &#x22;y = &#x22; + y/&#x3E;
+        &#x3C;print &#x22;z = x * y + 5 = &#x22; + z/&#x3E;
+        
+        &#x3C;if z > 100&#x3E;
+            &#x3C;print &#x22;z больше 100!&#x22;/&#x3E;
+        &#x3C;/if&#x3E;
+        
+        &#x3C;print &#x22;Цикл от 0 до 2:&#x22;/&#x3E;
+        &#x3C;loop i = 0 to 2&#x3E;
+            &#x3C;print &#x22;  i = &#x22; + i/&#x3E;
+        &#x3C;/loop&#x3E;
+    &#x3C;/program&#x3E;
+&#x3C;/kotnot&#x3E;`
+            ];
+            
+            const randomExample = examples[Math.floor(Math.random() * examples.length)];
+            document.getElementById('codeEditor').value = randomExample;
+            document.getElementById('lineCount').textContent = `Строк: ${randomExample.split('\n').length}`;
+            document.getElementById('statusText').textContent = '📄 Загружен пример';
+        }
+        
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('lineCount').textContent = 
+                `Строк: ${document.getElementById('codeEditor').value.split('\n').length}`;
+            document.getElementById('outputDisplay').textContent = 'Готов к работе. Нажмите "Запустить" или "Компилировать"';
+        });
+    </script>
+</body>
+</html>
